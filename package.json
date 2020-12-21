@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ToMakPo/UWCB-12-Employee_Tracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "inquirer": "^7.3.3",
     "mysql": "^2.18.1",
     "util": "^0.12.3"
