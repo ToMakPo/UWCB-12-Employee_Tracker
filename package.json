@@ -1,0 +1,24 @@
+{
+  "name": "employee_tracker",
+  "version": "1.0.0",
+  "description": "Homework assignment for unit 12 of UW Coding Bootcamp.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ToMakPo/UWCB-12-Employee_Tracker.git"
+  },
+  "author": "Makai Post",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ToMakPo/UWCB-12-Employee_Tracker/issues"
+  },
+  "homepage": "https://github.com/ToMakPo/UWCB-12-Employee_Tracker#readme",
+  "dependencies": {
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1",
+    "util": "^0.12.3"
+  }
+}
