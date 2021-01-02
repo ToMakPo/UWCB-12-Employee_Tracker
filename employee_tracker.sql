@@ -1,6 +1,5 @@
 DROP DATABASE IF EXISTS employee_tracker_db;
 CREATE DATABASE employee_tracker_db;
-GRANT ALL PRIVILEGES ON employee_tracker_db.* TO 'vbcode'@'localhost';
 USE employee_tracker_db;
 
 ###########################
