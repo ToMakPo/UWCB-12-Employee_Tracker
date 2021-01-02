@@ -53,13 +53,15 @@ async function add() {
 
     const id = await database.insertDepartment(info)
     console.log(id >= 0 ?
-        console.log(`\x1b[32m  ${info.name} was added to departments.\x1b[0m`) :
-        console.log(`\x1b[31m  Could not insert department.\x1b[0m`)
+        `\x1b[32m  ${info.name} was added to departments.\x1b[0m` :
+        `\x1b[31m  Could not insert department.\x1b[0m`
     )
     await wait()
     return id
 }
-async function updateDepartmentName(department) {}
+async function updateDepartmentName(department) {
+    
+}
 async function removeDepartment(department) {}
 
 module.exports = { display, add }
