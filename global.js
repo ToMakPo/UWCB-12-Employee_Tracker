@@ -9,7 +9,7 @@ async function wait() {
         type: 'input',
         message: '\x1b[90m-- Press enter to continue. --\x1b[0m',
         prefix: ' ',
-        transformer: input => ""
+        transformer: () => ""
     }])
 }
 
