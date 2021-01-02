@@ -51,7 +51,7 @@ async function getEmployees(where) {
 }
 
 async function getDepartments() {
-    return await runQuery('SELECT *\nFROM department')
+    return await runQuery('SELECT *\nFROM department\nORDER BY name')
 }
 
 async function getManagers() {
