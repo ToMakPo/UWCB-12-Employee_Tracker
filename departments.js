@@ -38,7 +38,27 @@ async function display() {
     const records = await database.getDepartments()
     await displayDepartmentTable(records)
 }
-async function add() {}
+async function add() {
+    const departments = (await database.getDepartments()).map(record => record.name)
+    const info = await inquirer.prompt([{
+        name: 'name',
+        message: 'What is the name of the department?',
+        prefix: '-',
+        validate: input => {
+            if (input.length == 0) return 'You must provide a department name.'
+            if (departments.includes(input)) return 'A department with that name already exists.'
+            return true
+        }
+    }])
+
+    const id = await database.insertDepartment(info)
+    console.log(id >= 0 ?
+        console.log(`\x1b[32m  ${info.name} was added to departments.\x1b[0m`) :
+        console.log(`\x1b[31m  Could not insert department.\x1b[0m`)
+    )
+    await wait()
+    return id
+}
 async function updateDepartmentName(department) {}
 async function removeDepartment(department) {}
 
