@@ -1,6 +1,7 @@
 const mysql = require('mysql')
 const util = require('util')
 const cTable = require('console.table')
+const fs = require('fs')
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -109,5 +110,52 @@ async function deleteDepartment(id) {
 function closeConnection() {
     connection.end()
 }
+
+async function reset() {
+    // const sql = fs.readFileSync('./employee_tracker.sql', 'utf-8')
+    // const statments = sql.split(';').map(statment => statment.split('\n')
+    //     .filter(line => line.length > 0 && line[0] != '#')
+    //     .join('\n'))
+    // // console.log(statments.join('\n\n\n').replace('\t', ''));
+
+    // // for (const statment of statments) {
+    // //     console.log(statment);
+    // //     const responce = await query(statment)
+    // //     console.log(responce);
+    // // }
+    
+    // const responce = await query(statments.join(';\n\n\n'))
+    // console.log(responce);
+}
+
+async function printTable(table, where) {
+    if (where.length) {
+        where = where.reduce((obj, val) => {
+            const [key, value] = val.split(':')
+            obj[key] = value
+            return obj
+        }, {})
+        const records = await query(`SELECT * FROM ${table} WHERE ?`, where)
+        console.table(records)
+    } else {
+        const records = await query(`SELECT * FROM ${table}`)
+        console.table(records)
+    }
+}
+
+async function call() {
+    if (process.argv[1].split('\\').pop() == 'database.js') {
+        for (const option of process.argv.slice(2)) {
+            if (option == '-r') reset()
+            else if (option.substr(0, 3) == '-pt') {
+                let [table, ...where] = option.split('.').slice(1)
+                await printTable(table, where)
+            }
+            else eval(option)
+        }
+        connection.end()
+    }
+}
+if (process.argv.length > 2) call()
 
 module.exports = database
