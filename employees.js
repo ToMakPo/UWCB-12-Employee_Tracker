@@ -1,4 +1,3 @@
-const { getDepartments } = require('./database')
 const {inquirer, database, separator, wait, displayTable} = require('./global')
 
 async function displayEmployeeTable(records) {
@@ -191,7 +190,7 @@ async function updateName(employee) {
         
     console.log(message);
     await wait()
-    return false
+    return updated
 }
 async function getManager(department_id, except) {
     const employees = [...(await database.getDepartmentEmployees(department_id, except)).map(employee => {
@@ -231,7 +230,7 @@ async function updateManager(employee) {
 
     console.log(message);
     await wait()
-    return false
+    return updated
 }
 
 async function getRole(department_id) {
@@ -285,7 +284,7 @@ async function updateRole(employee) {
 
     console.log(message);
     await wait()
-    return false
+    return updated
 }
 
 async function getDepartment() {
@@ -345,7 +344,7 @@ async function updateDepartment(employee) {
 
     console.log(message);
     await wait()
-    return false
+    return updated
 }
 
 async function remove(employee) {
