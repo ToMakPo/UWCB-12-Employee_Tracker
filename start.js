@@ -1,7 +1,6 @@
 const {inquirer, database, separator} = require('./global')
 const employees = require('./employees')
 const departments = require('./departments')
-const roles = require('./roles')
 
 async function start() {
     console.clear()
@@ -37,9 +36,6 @@ const initialAction = [
     separator,
     {name: '\x1b[94mView Departments\x1b[0m', value: departments.display},
     {name: '\x1b[92mAdd Department\x1b[0m', value: departments.add},
-    separator,
-    {name: '\x1b[94mView Roles by Department\x1b[0m', value: roles.display},
-    {name: '\x1b[92mAdd Role\x1b[0m', value: roles.add},
     separator,
     {name: 'Quit', value: null}
 ]

@@ -1,10 +1,14 @@
 const { inquirer, database, separator, wait, displayTable } = require('./global')
+const roles = require('./roles')
 
-const departmentOptions = [
-    { name: '\x1b[94mUpdate name\x1b[0m', value: updateDepartmentName },
-    { name: '\x1b[91mRemove department\x1b[0m', value: removeDepartment },
+const options = [
+    { name: '\x1b[94mView Roles\x1b[0m', value: viewRoles },
+    { name: '\x1b[92mAdd Role\x1b[0m', value: addRole },
     separator,
-    { name: 'Nothing', value: null }
+    { name: '\x1b[94mUpdate Name\x1b[0m', value: updateName },
+    { name: '\x1b[91mRemove\x1b[0m', value: remove },
+    separator,
+    { name: 'Back', value: null }
 ]
 async function displayDepartmentTable(records) {
     const headers = ['name']
@@ -19,20 +23,23 @@ async function displayDepartmentTable(records) {
 
     const department = await displayTable(headers, rows)
 
-    if (department) {
-        const { action } = await inquirer.prompt([{
-            name: 'action',
-            type: 'list',
-            message: 'What would you like to do with this department?',
-            prefix: '-',
-            choices: departmentOptions
-        }])
-
-        if (action) {
-            return await action(department)
-        }
-    }
+    if (department) 
+        return await displayOptions(department)
     return null
+}
+async function displayOptions(department) {
+    const { action } = await inquirer.prompt([{
+        name: 'action',
+        type: 'list',
+        message: 'What would you like to do with this department?',
+        prefix: '-',
+        choices: options,
+        pageSize: 99
+    }])
+
+    if (action) {
+        await action(department)
+    }
 }
 async function display() {
     const records = await database.getDepartments()
@@ -56,10 +63,10 @@ async function add() {
         `\x1b[32m  ${info.name} was added to departments.\x1b[0m` :
         `\x1b[31m  Could not insert department.\x1b[0m`
     )
-    await wait()
-    return id
+    const department = (await database.getDepartmentByID(id))[0]
+    return await displayOptions(department)
 }
-async function updateDepartmentName(department) {
+async function updateName(department) {
     const departments = (await database.getDepartments()).map(record => record.name)
     console.log('- What would you like to change the name to?')
     const info = await inquirer.prompt([{
@@ -88,58 +95,35 @@ async function updateDepartmentName(department) {
     })()
 
     console.log(message)
-    await wait()
-    return updated
+    return await displayOptions()
 }
-async function removeDepartment(department) {
-    const employeesInDepartment = await database.getDepartmentEmployees(department.id)
+async function remove(department) {
+    const departmentID = department.id
+    const employeesInDepartment = await database.getDepartmentEmployees(departmentID)
+    
     if (employeesInDepartment.length > 0) {
-        const { option } = await inquirer.prompt([{
-            name: 'option',
-            type: 'list',
-            message: 'You have a number of employees in this department. What would you like to do with them?',
-            prefix: '-',
-            choices: [
-                { name: 'Move them to another department.', value: switchDepartment },
-                { name: 'Remove them as well.', value: desolveDepartment },
-                { name: 'Leave them unasigned.', value: unasigneThem },
-                separator,
-                { name: 'Nevermind. Don\'t remove department.', value: null }
-            ]
-        }])
-        if (option) option()
-        else {
-            console.log(`\x1b[31m  The department was not be removed.\x1b[0m`)
-            return false
-        }
-
-        function switchDepartment() {
-            const departments = (await database.getDepartments())
-                .filter(record => record.name != department.name)
-                .map(record => { return { name: record.name, value: record } })
-
-            const { newDepartment } = await inquirer.prompt([{
-                name: 'newDepartment',
-                type: 'list',
-                message: 'What department would you like to move them to?',
-                prefix: '-',
-                choices: departments
-            }])
-
-            const roles = (await database.getDepartmentRoles(newDepartment.id))
-                .map(record => { return { name: record.title, value: record } })
-            const newRole = roles.length = 0 ?
-                
-        }
-        function desolveDepartment() { }
-        function unasigneThem() { }
+        console.log('  \x1b[33mThere are a number of employees in this department still. You will\n' + 
+                    '  need to move them to another department before you can remove this.\x1b[0m')
+    } else {
+        const removed = await database.deleteDepartment(departmentID)
+        
+        const message = removed ?
+            '\x1b[32m  The department has been removed.\x1b[0m' :
+            '\x1b[31m  The department could not be removed.\x1b[0m'
+        
+        console.log(message)
     }
-    // const removed = await database.deleteDepartment(department.id)
-    // console.log(removed ? 
-    //     `\x1b[32m  ${department.name} was removed.\x1b[0m` :
-    //     `\x1b[31m  The department could not be removed.\x1b[0m`)
     await wait()
-    return removed
+}
+
+async function viewRoles(department) {
+    await roles.display(department)
+    await displayOptions(department)
+}
+
+async function addRole(department) {
+    await roles.add(department)
+    await displayOptions(department)
 }
 
 module.exports = { display, add }

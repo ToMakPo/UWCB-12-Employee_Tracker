@@ -108,5 +108,3 @@ CREATE VIEW manager_view AS
 		WHERE manager_id IS NOT NULL
 		GROUP BY manager_id
 	);
-SELECT * FROM manager_view;
-SELECT * FROM employee_display_view WHERE `manager_id` = 6;

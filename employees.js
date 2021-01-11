@@ -17,21 +17,25 @@ async function displayEmployeeTable(records) {
 
     const employee = await displayTable(headers, rows)
     
-    if (employee) {
-        const {action} = await inquirer.prompt([{
-            name: 'action',
-            type: 'list',
-            message: 'What would you like to do with this employee?',
-            prefix: '-',
-            choices: employeeOptions
-        }])
-
-        if (action) {
-            return await action(employee)
-        }
-    }
+    if (employee) await displayOptions(employee)
     return null
 }
+async function displayOptions(employee) {
+    const {action} = await inquirer.prompt([{
+        name: 'action',
+        type: 'list',
+        message: 'What would you like to do with this employee?',
+        prefix: '-',
+        choices: options,
+        pageSize: 99
+    }])
+
+    if (action) {
+        await action(employee)
+        await displayOptions()
+    }
+}
+
 async function display() {
     const records = await database.getEmployees()
     await displayEmployeeTable(records)
@@ -138,23 +142,24 @@ async function add() {
         pageSize: 10
     }])
 
-    const newID = await database.insertEmployee({first_name, last_name, role_id, manager_id}) 
-    const message = newID > 0 ?
+    const id = await database.insertEmployee({first_name, last_name, role_id, manager_id}) 
+    const message = id > 0 ?
         `\x1b[32m  ${first_name + ' ' + last_name} was added to employees.\x1b[0m` :
         '\x1b[31m  Could not insert employee.\x1b[0m'
     console.log(message)
-    await wait()
-    return newID
+
+    const employee = (await database.getRoleByID(id))[0]
+    return await displayOptions(employee)
 }
 
-const employeeOptions = [
+const options = [
     {name: '\x1b[94mUpdate Name\x1b[0m', value: updateName},
     {name: '\x1b[94mUpdate Manager\x1b[0m', value: updateManager},
     {name: '\x1b[94mUpdate Role\x1b[0m', value: updateRole},
     {name: '\x1b[94mUpdate Department\x1b[0m', value: updateDepartment},
     {name: '\x1b[91mRemove Employee\x1b[0m', value: remove},
     separator,
-    {name: 'Nothing', value: null}
+    {name: 'Back', value: null}
 ]
 async function updateName(employee) {
     const info = await inquirer.prompt([{
@@ -189,8 +194,7 @@ async function updateName(employee) {
     })()
         
     console.log(message);
-    await wait()
-    return updated
+    return await displayOptions(employee)
 }
 async function getManager(department_id, except) {
     const employees = [...(await database.getDepartmentEmployees(department_id, except)).map(employee => {
@@ -229,8 +233,7 @@ async function updateManager(employee) {
     })()
 
     console.log(message);
-    await wait()
-    return updated
+    return await displayOptions(employee)
 }
 
 async function getRole(department_id) {
@@ -283,8 +286,7 @@ async function updateRole(employee) {
     })()
 
     console.log(message);
-    await wait()
-    return updated
+    return await displayOptions(employee)
 }
 
 async function getDepartment() {
@@ -343,8 +345,7 @@ async function updateDepartment(employee) {
     })()
 
     console.log(message);
-    await wait()
-    return updated
+    return await displayOptions(employee)
 }
 
 async function remove(employee) {
@@ -360,5 +361,6 @@ module.exports = {
     display, 
     displayByDepartment,
     displayByManager,
+    displayEmployeeTable,
     add
 }

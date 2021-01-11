@@ -1,7 +1,7 @@
 const mysql = require('mysql')
 const util = require('util')
-const cTable = require('console.table')
-const fs = require('fs')
+require('console.table')
+// const fs = require('fs')
 
 const connection = mysql.createConnection({
 	host: 'localhost',
@@ -24,9 +24,14 @@ async function runQuery(string, args) {
 
 const database = {
 	getEmployees,
+	getEmployeeByID,
 	getDepartments,
+	getDepartmentByID,
+	getRoleByID,
 	getDepartmentRoles,
+	getAllTitles,
 	getDepartmentEmployees,
+	getRoleEmployees,
 	getManagers,
 
 	insertEmployee,
@@ -49,9 +54,19 @@ async function getEmployees(where) {
 		? await runQuery(`SELECT * FROM employee_view WHERE ?`, where)
 		: await runQuery(`SELECT * FROM employee_view`)
 }
+async function getEmployeeByID(id) {
+	return await runQuery('SELECT *\nFROM employee_view\nWHERE ?', {id})
+}
 
 async function getDepartments() {
 	return await runQuery('SELECT *\nFROM department\nORDER BY name')
+}
+async function getDepartmentByID(id) {
+	return await runQuery('SELECT *\nFROM department\nWHERE ?', {id})
+}
+
+async function getRoleByID(id) {
+	return await runQuery('SELECT *\nFROM role\nWHERE ?', {id})
 }
 
 async function getManagers() {
@@ -60,14 +75,24 @@ async function getManagers() {
 	)
 }
 
-async function getDepartmentRoles(department_id) {
-	return await runQuery('SELECT *\nFROM role\nWHERE ?', { department_id })
+async function getDepartmentRoles(departmentID) {
+	return await runQuery('SELECT *\nFROM role\nWHERE ?', { department_id: departmentID })
 }
 
-async function getDepartmentEmployees(department_id, except = -1) {
+async function getAllTitles() {
+	return await runQuery('SELECT title\nFROM role')
+}
+
+async function getDepartmentEmployees(departmentID, except = -1) {
 	return await runQuery(
 		'SELECT id, CONCAT(first_name, " ", last_name) AS full_name, title\nFROM employee_view\nWHERE ?\nAND id <> ?',
-		[{ department_id }, except]
+		[{ department_id: departmentID }, except]
+	)
+}
+
+async function getRoleEmployees(roleID) {
+	return await runQuery(
+		'SELECT *\nFROM employee_view\nWHERE ?', { role_id: roleID }
 	)
 }
 
